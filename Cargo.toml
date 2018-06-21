@@ -1,0 +1,8 @@
+[package]
+name = "music-manager"
+version = "0.1.0"
+authors = ["Purple Myst <PurpleMyst@users.noreply.github.com>"]
+
+[dependencies]
+kiss-ui = { git = "https://github.com/cybergeek94/kiss-ui" }
+duct = "0.10.0"
