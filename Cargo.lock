@@ -74,6 +74,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "lazy_static"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "lazycell"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -94,6 +99,7 @@ version = "0.1.0"
 dependencies = [
  "duct 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "kiss-ui 0.1.0 (git+https://github.com/cybergeek94/kiss-ui)",
+ "lazy_static 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -173,6 +179,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum iup-sys 0.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "f2d9d1a5dc643b6c3ed9165e9e023599a7ce30e9b80b69989d63f4b86843b68f"
 "checksum kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"
 "checksum kiss-ui 0.1.0 (git+https://github.com/cybergeek94/kiss-ui)" = "<none>"
+"checksum lazy_static 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "e6412c5e2ad9584b0b8e979393122026cdd6d2a80b933f890dcd694ddbe73739"
 "checksum lazycell 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a6f08839bc70ef4a3fe1d566d5350f519c5912ea86be0df1740a7d247c7fc0ef"
 "checksum libc 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)" = "e32a70cf75e5846d53a673923498228bbec6a8624708a9ea5645f075d6276122"
 "checksum libc 0.2.42 (registry+https://github.com/rust-lang/crates.io-index)" = "b685088df2b950fccadf07a7187c8ef846a959c142338a48f9dc0b94517eb5f1"

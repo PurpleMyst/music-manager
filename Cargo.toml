@@ -6,3 +6,4 @@ authors = ["Purple Myst <PurpleMyst@users.noreply.github.com>"]
 [dependencies]
 kiss-ui = { git = "https://github.com/cybergeek94/kiss-ui" }
 duct = "0.10.0"
+lazy_static = "1.0.1"

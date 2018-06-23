@@ -4,6 +4,9 @@ extern crate kiss_ui;
 #[macro_use]
 extern crate duct;
 
+#[macro_use]
+extern crate lazy_static;
+
 use ::kiss_ui::prelude::*;
 
 use ::kiss_ui::button::Button;
@@ -33,6 +36,17 @@ impl<Args: 'static, F: Fn(Args) -> () + 'static> Callback<Args> for MyCallback<A
 
 fn download<V: Into<Vec<u8>>>(progress_bar: ProgressBar, urls: V) {
     // TODO: Show a dialog in many places here.
+    use ::std::sync::RwLock;
+
+    lazy_static! {
+        static ref busy: RwLock<bool> = RwLock::new(false);
+    }
+
+    if *busy.read().unwrap() {
+        return;
+    } else {
+        *busy.write().unwrap() = true;
+    }
 
     let maybe_handle: Result<duct::Handle, _> = cmd!(
         "youtube-dl",
@@ -54,10 +68,10 @@ fn download<V: Into<Vec<u8>>>(progress_bar: ProgressBar, urls: V) {
                 .set_interval(1 * 1000)
                 .set_on_interval(MyCallback::new(move |timer: Timer| {
                     match handle.try_wait() {
-                        Ok(Some(output)) => {
-                            println!("output: {:?}", output);
+                        Ok(Some(_)) => {
                             progress_bar.hide();
                             timer.destroy();
+                            *busy.write().unwrap() = false;
                         }
 
                         Ok(None) => {}
