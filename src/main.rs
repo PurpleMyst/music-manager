@@ -9,11 +9,12 @@ extern crate lazy_static;
 
 use ::kiss_ui::prelude::*;
 
+use ::kiss_ui::dialog::AlertPopupBuilder;
 use ::kiss_ui::button::Button;
 use ::kiss_ui::callback::{Callback, CallbackStatus};
-use ::kiss_ui::container::Grid;
+use ::kiss_ui::container::{Horizontal, Vertical};
 use ::kiss_ui::progress::ProgressBar;
-use ::kiss_ui::text::TextBox;
+use ::kiss_ui::text::{TextBox};
 use ::kiss_ui::timer::Timer;
 
 struct MyCallback<Args, F: Fn(Args) -> ()>(F, ::std::marker::PhantomData<Args>);
@@ -34,18 +35,24 @@ impl<Args: 'static, F: Fn(Args) -> () + 'static> Callback<Args> for MyCallback<A
     }
 }
 
+fn show_error_dialog(e: impl ::std::fmt::Display) {
+    AlertPopupBuilder::new("There's been an error",
+                           format!("{}", e),
+                           "Ok").popup();
+}
+
 fn download<V: Into<Vec<u8>>>(progress_bar: ProgressBar, urls: V) {
     // TODO: Show a dialog in many places here.
     use ::std::sync::RwLock;
 
     lazy_static! {
-        static ref busy: RwLock<bool> = RwLock::new(false);
+        static ref BUSY: RwLock<bool> = RwLock::new(false);
     }
 
-    if *busy.read().unwrap() {
+    if *BUSY.read().unwrap() {
         return;
     } else {
-        *busy.write().unwrap() = true;
+        *BUSY.write().unwrap() = true;
     }
 
     let maybe_handle: Result<duct::Handle, _> = cmd!(
@@ -71,24 +78,26 @@ fn download<V: Into<Vec<u8>>>(progress_bar: ProgressBar, urls: V) {
                         Ok(Some(_)) => {
                             progress_bar.hide();
                             timer.destroy();
-                            *busy.write().unwrap() = false;
+                            *BUSY.write().unwrap() = false;
                         }
 
                         Ok(None) => {}
 
-                        Err(_) => {
-                            unimplemented!("error handling");
+                        Err(e) => {
+                            show_error_dialog(e);
+                            progress_bar.hide();
+                            timer.destroy();
+                            *BUSY.write().unwrap() = false;
                         }
                     }
                 }))
                 .start();
         }
-        Err(_) => unimplemented!("error handling"),
+        Err(e) => show_error_dialog(e),
     }
 }
 
 fn main() {
-    // I'm 99% sure they switched up Horizontal and Vertical on Grid.
     kiss_ui::show_gui(|| {
         let text_box = TextBox::new();
         text_box.set_multiline(true);
@@ -117,11 +126,9 @@ fn main() {
             unimplemented!("clicked move button");
         }));
 
-        let mut small_grid = Grid::new(children![download_button, move_button, progress_bar]);
-        small_grid.set_orientation(Orientation::Vertical);
-        small_grid.set_ndiv(5);
+        let small_grid = Horizontal::new(children![download_button, move_button, progress_bar]);
 
-        let big_grid = Grid::new(children![text_box, small_grid]);
+        let big_grid = Vertical::new(children![text_box, small_grid]);
 
         let dialog = Dialog::new(big_grid);
         dialog.set_title("Music Manager");
