@@ -17,24 +17,6 @@ use ::kiss_ui::progress::ProgressBar;
 use ::kiss_ui::text::{TextBox};
 use ::kiss_ui::timer::Timer;
 
-struct MyCallback<Args, F: Fn(Args) -> ()>(F, ::std::marker::PhantomData<Args>);
-
-impl<Args: 'static, F: Fn(Args) -> () + 'static> MyCallback<Args, F> {
-    fn new(f: F) -> Self {
-        Self {
-            0: f,
-            1: ::std::marker::PhantomData,
-        }
-    }
-}
-
-impl<Args: 'static, F: Fn(Args) -> () + 'static> Callback<Args> for MyCallback<Args, F> {
-    fn on_callback(&mut self, args: Args) -> CallbackStatus {
-        (self.0)(args);
-        CallbackStatus::Default
-    }
-}
-
 fn show_error_dialog(e: impl ::std::fmt::Display) {
     AlertPopupBuilder::new("There's been an error",
                            format!("{}", e),
@@ -73,7 +55,7 @@ fn download<V: Into<Vec<u8>>>(progress_bar: ProgressBar, urls: V) {
 
             Timer::new()
                 .set_interval(1 * 1000)
-                .set_on_interval(MyCallback::new(move |timer: Timer| {
+                .set_on_interval((move |timer: Timer| {
                     match handle.try_wait() {
                         Ok(Some(_)) => {
                             progress_bar.hide();
@@ -115,14 +97,14 @@ fn main() {
         {
             let text_box = text_box.clone();
             let progress_bar = progress_bar.clone();
-            download_button.set_onclick(MyCallback::new(move |_| {
+            download_button.set_onclick((move |_| {
                 download(progress_bar.clone(), text_box.get_text().to_string());
             }));
         }
 
         let move_button = Button::new();
         move_button.set_label("Move To");
-        move_button.set_onclick(MyCallback::new(|_| {
+        move_button.set_onclick((|_| {
             unimplemented!("clicked move button");
         }));
 
