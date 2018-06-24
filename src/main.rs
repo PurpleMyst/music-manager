@@ -7,25 +7,23 @@ extern crate duct;
 #[macro_use]
 extern crate lazy_static;
 
-use ::kiss_ui::prelude::*;
+use kiss_ui::prelude::*;
 
-use ::kiss_ui::dialog::AlertPopupBuilder;
-use ::kiss_ui::button::Button;
-use ::kiss_ui::callback::{Callback, CallbackStatus};
-use ::kiss_ui::container::{Horizontal, Vertical};
-use ::kiss_ui::progress::ProgressBar;
-use ::kiss_ui::text::{TextBox};
-use ::kiss_ui::timer::Timer;
+use kiss_ui::button::Button;
+use kiss_ui::callback::{Callback, CallbackStatus};
+use kiss_ui::container::{Horizontal, Vertical};
+use kiss_ui::dialog::AlertPopupBuilder;
+use kiss_ui::progress::ProgressBar;
+use kiss_ui::text::TextBox;
+use kiss_ui::timer::Timer;
 
 fn show_error_dialog(e: impl ::std::fmt::Display) {
-    AlertPopupBuilder::new("There's been an error",
-                           format!("{}", e),
-                           "Ok").popup();
+    AlertPopupBuilder::new("There's been an error", format!("{}", e), "Ok").popup();
 }
 
 fn download<V: Into<Vec<u8>>>(progress_bar: ProgressBar, urls: V) {
     // TODO: Show a dialog in many places here.
-    use ::std::sync::RwLock;
+    use std::sync::RwLock;
 
     lazy_static! {
         static ref BUSY: RwLock<bool> = RwLock::new(false);
@@ -43,8 +41,10 @@ fn download<V: Into<Vec<u8>>>(progress_bar: ProgressBar, urls: V) {
         "--add-metadata",
         "--extract-audio",
         "--ignore-errors",
-        "--audio-format", "best",
-        "-a", "-"
+        "--audio-format",
+        "best",
+        "-a",
+        "-"
     ).input(urls)
         .dir("./download")
         .start();
@@ -55,24 +55,22 @@ fn download<V: Into<Vec<u8>>>(progress_bar: ProgressBar, urls: V) {
 
             Timer::new()
                 .set_interval(1 * 1000)
-                .set_on_interval((move |timer: Timer| {
-                    match handle.try_wait() {
-                        Ok(Some(_)) => {
-                            progress_bar.hide();
-                            timer.destroy();
-                            *BUSY.write().unwrap() = false;
-                        }
-
-                        Ok(None) => {}
-
-                        Err(e) => {
-                            show_error_dialog(e);
-                            progress_bar.hide();
-                            timer.destroy();
-                            *BUSY.write().unwrap() = false;
-                        }
+                .set_on_interval(move |timer: Timer| match handle.try_wait() {
+                    Ok(Some(_)) => {
+                        progress_bar.hide();
+                        timer.destroy();
+                        *BUSY.write().unwrap() = false;
                     }
-                }))
+
+                    Ok(None) => {}
+
+                    Err(e) => {
+                        show_error_dialog(e);
+                        progress_bar.hide();
+                        timer.destroy();
+                        *BUSY.write().unwrap() = false;
+                    }
+                })
                 .start();
         }
         Err(e) => show_error_dialog(e),
@@ -97,16 +95,16 @@ fn main() {
         {
             let text_box = text_box.clone();
             let progress_bar = progress_bar.clone();
-            download_button.set_onclick((move |_| {
+            download_button.set_onclick(move |_| {
                 download(progress_bar.clone(), text_box.get_text().to_string());
-            }));
+            });
         }
 
         let move_button = Button::new();
         move_button.set_label("Move To");
-        move_button.set_onclick((|_| {
+        move_button.set_onclick(|_| {
             unimplemented!("clicked move button");
-        }));
+        });
 
         let small_grid = Horizontal::new(children![download_button, move_button, progress_bar]);
 
